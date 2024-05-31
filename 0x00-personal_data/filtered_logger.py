@@ -6,6 +6,8 @@ redaction string using regular expressions.
 """
 
 import logging
+import os
+import mysql.connector
 import re
 from typing import List, Tuple
 
@@ -94,3 +96,31 @@ def get_logger() -> logging.Logger:
     logger.addHandler(handler)
 
     return logger
+
+
+def get_db() -> mysql.connector.connection.MySQLConnection:
+    """
+    Connects to the MySQL database using environment variables for credentials.
+
+    Returns:
+        mysql.connector.connection.MySQLConnection:
+                Connection object to the database.
+    """
+    # Get database credentials from environment variables
+    username = os.getenv("PERSONAL_DATA_DB_USERNAME", "root")
+    password = os.getenv("PERSONAL_DATA_DB_PASSWORD", "")
+    host = os.getenv("PERSONAL_DATA_DB_HOST", "localhost")
+    database = os.getenv("PERSONAL_DATA_DB_NAME", "")
+
+    # Connect to the database
+    try:
+        db = mysql.connector.connect(
+            user=username,
+            password=password,
+            host=host,
+            database=database
+        )
+        return db
+    except mysql.connector.Error as err:
+        print(f"Error connecting to MySQL: {err}")
+        raise
