@@ -5,9 +5,11 @@ log messages. It replaces the values of specified fields with a
 redaction string using regular expressions.
 """
 
-import re
-from typing import List
 import logging
+import re
+from typing import List, Tuple
+
+PII_FIELDS: Tuple[str, ...] = ("name", "email", "phone", "ssn", "password")
 
 
 def filter_datum(
@@ -70,3 +72,25 @@ class RedactingFormatter(logging.Formatter):
                 self.fields, self.REDACTION, original_message, self.SEPARATOR
         )
         return redacted_message
+
+
+def get_logger() -> logging.Logger:
+    """
+    Creates and configures a logger named "user_data".
+
+    The logger logs up to logging.INFO level and does not propagate messages
+    to other loggers. It uses a StreamHandler with RedactingFormatter.
+
+    Returns:
+        logging.Logger: The configured logger object.
+    """
+    logger = logging.getLogger("user_data")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+
+    handler = logging.StreamHandler()
+    formatter = RedactingFormatter(fields=list(PII_FIELDS))
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    return logger
