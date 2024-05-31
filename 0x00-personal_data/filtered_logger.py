@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-
-import re
-from typing import List
 """
 This module provides a function to filter and obfuscate specified fields in
 log messages. It replaces the values of specified fields with a
 redaction string using regular expressions.
 """
+
+import re
+from typing import List
 
 
 def filter_datum(
