@@ -76,28 +76,6 @@ class RedactingFormatter(logging.Formatter):
         return redacted_message
 
 
-def get_logger() -> logging.Logger:
-    """
-    Creates and configures a logger named "user_data".
-
-    The logger logs up to logging.INFO level and does not propagate messages
-    to other loggers. It uses a StreamHandler with RedactingFormatter.
-
-    Returns:
-        logging.Logger: The configured logger object.
-    """
-    logger = logging.getLogger("user_data")
-    logger.setLevel(logging.INFO)
-    logger.propagate = False
-
-    handler = logging.StreamHandler()
-    formatter = RedactingFormatter(fields=list(PII_FIELDS))
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    return logger
-
-
 def get_db() -> mysql.connector.connection.MySQLConnection:
     """
     Connects to the MySQL database using environment variables for credentials.
@@ -120,3 +98,58 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
         database=database
     )
     return db
+
+
+def main():
+    """
+    Main function to retrieve all rows in the users table and display each row
+    under a filtered format.
+    """
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+            "SELECT name, email, phone, ssn, password, ip, last_login"
+            ",user_agent FROM users;"
+    )
+
+    logger = get_logger()
+    for row in cursor:
+        log_record = (
+                f"name={row[0]}; email={row[1]}; phone={row[2]}; "
+                f"ssn={row{[3]}; password={row[4]}; ip={row[5]}; "
+                f"last_login={row[6]}; user_agent={row[7]}"
+        )
+        log_entry = logging.LogRecord(
+                name="user_data", level=logging.INFO, pathname="",
+                lineno=0, msg=log_record, args=(), exc_info=None
+        )
+        logger.handle(log_entry)
+
+    cursor.close()
+    db.close()
+
+
+def get_logger() -> logging.Logger:
+    """
+    Creates and configures a logger named "user_data".
+
+    The logger logs up to logging.INFO level and does not propagate messages
+    to other loggers. It uses a StreamHandler with RedactingFormatter.
+
+    Returns:
+        logging.Logger: The configured logger object.
+    """
+    logger = logging.getLogger("user_data")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+
+    handler = logging.StreamHandler()
+    formatter = RedactingFormatter(fields=list(PII_FIELDS))
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    return logger
+
+
+if __name__ == "__main__":
+    main()
