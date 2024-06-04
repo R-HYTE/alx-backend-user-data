@@ -8,19 +8,16 @@ from typing import List, TypeVar
 
 class Auth:
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
-        """
-        Method to determine if authentication is required
+        """ Method to determine if authentication is required
         """
         return False
 
     def authorization_header(self, request=None) -> str:
-        """
-        Method to retrieve the authorization header
+        """ Method to retrieve the authorization header
         """
         return None
 
     def current_user(self, request=None) -> TypeVar('User'):
-        """
-        Method to retrieve the current user
+        """ Method to retrieve the current user
         """
         return None
