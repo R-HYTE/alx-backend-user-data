@@ -27,12 +27,10 @@ class Auth:
             path = path[:-1]
 
         for excluded_path in excluded_paths:
-            has_trailing_slash = excluded_path.endswith('/')
-            excluded_path_no_slash = (
-                    excluded_path[:-1] if has_trailing_slash else excluded_path
-            )
+            if excluded_path.endswith('/'):
+                excluded_path = excluded_path[:-1]
 
-            if fnmatch.fnmatch(path, excluded_path_no_slash):
+            if fnmatch.fnmatch(path, excluded_path):
                 return False
 
         return True
@@ -47,7 +45,7 @@ class Auth:
             str: The value of the Authorization header or None if not found.
         """
         if request is not None:
-            return request.headers.get('Authorization')
+            return request.headers.get('Authorization', None)
         return None
 
     def current_user(self, request=None) -> TypeVar('User'):
