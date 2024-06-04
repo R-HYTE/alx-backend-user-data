@@ -4,6 +4,7 @@ Module for API authentication management.
 """
 from flask import request
 from typing import List, TypeVar
+import fnmatch
 
 
 class Auth:
@@ -11,8 +12,30 @@ class Auth:
     """
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
         """ Method to determine if authentication is required
+        Returns:
+        True:
+            * If `path` is None.
+            * If `excluded_paths` is None or empty.
+            * If `path` doesn't match any path in `excluded_paths`.
+        False:
+            * If `path` matches any path in `excluded_paths` (case-sensitive).
         """
-        return False
+        if path is None or (not excluded_paths):
+            return True
+
+        if path[-1] == '/':
+            path = path[:-1]
+
+        for excluded_path in excluded_paths:
+            has_trailing_slash = excluded_path.endswith('/')
+            excluded_path_no_slash = (
+                    excluded_path[:-1] if has_trailing_slash else excluded_path
+            )
+
+            if fnmatch.fnmatch(path, excluded_path_no_slash):
+                return False
+
+        return True
 
     def authorization_header(self, request=None) -> str:
         """ Method to retrieve the authorization header
