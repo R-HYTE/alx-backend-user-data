@@ -59,8 +59,6 @@ def logout() -> str:
     """Logout a user by destroying the session.
     """
     session_id = request.cookies.get("session_id")
-    if not session_id:
-        abort(403)
     user = AUTH.get_user_from_session_id(session_id)
     if not user:
         abort(403)
